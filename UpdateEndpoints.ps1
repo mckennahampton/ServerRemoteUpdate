@@ -233,4 +233,37 @@ function updateEndpoints( $endpointCSV, $emailSummary, $toEmail, $fromEmail, $sm
     foreach ($server IN $serverInvokeList) {
         Start-Process -FilePath 'PowerShell.exe' -ArgumentList '-NoExit',"-command `"Write-Host 'C:\WindowsUpdates\UpdateEndpoints-Local.ps1'; Enter-PSSession -ComputerName $server`";"
     }
+
+    # Start testing for all endpoints reboot cycle
+    $endpointRebootCycle = @();
+    foreach ($server IN $serverInvokeList) {
+        $thisServer = [pscustomobject]@{
+            ServerName = $server;
+            Status = "UP";
+        };
+        $endpointRebootCycle += $thisServer;
+    }
+    $allEndpointsRebooted -ne $false
+    DO {
+        foreach ($endpoint IN $endpointRebootCycle) {
+            $test = Test-Connection -ComputerName $endpoint.ServerName -quiet;
+            if ($test) {
+                # Status of endpoint is up
+                $status = "UP";
+                $foregroundColor = "Green";
+            } else {
+                # Status of endpoint is down
+                $status = "DOWN";
+                $foregroundColor = "Red";
+            }
+            if ($status -eq $endpoint.Status) {
+                # No change, don't change or print anything
+            }
+            else {
+                # Change detected, write to console
+		        $endpoint.Status = $status;
+                Write-Host "$($endpoint.ServerName) status changed to $($endpoint.Status)" -ForegroundColor $foregroundColor;
+            }
+        }
+    } WHILE ( $allEndpointsRebooted -ne $true )
 }
