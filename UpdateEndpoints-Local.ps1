@@ -9,7 +9,6 @@ $updates | % {
     if (!(Test-Path "c:\WindowsUpdates\$($KB)-extract")){
         New-Item -ItemType directory -Path "c:\WindowsUpdates\$($KB)-extract"
     }
-    #cmd /c "winrs.exe -r:$($env:COMPUTERNAME) wusa.exe '$($_.FullName)' /extract:'C:\WindowsUpdates\extracts'"
     expand -f:* $_.FullName "C:\WindowsUpdates\$($KB)-extract"
     $cabs = Get-Childitem "C:\WindowsUpdates\$($KB)-extract\*" -Include "*.cab";
     ForEach ($cab IN $cabs) {
@@ -56,6 +55,12 @@ if ($Qty -eq 0){
             if ($_.Name -match "extract") {
                 Remove-Item -LiteralPath "$($_.FullName)" -Force -Recurse
             }
+        }
+         if ((Test-Path C:\$WINDOWS.~BT)) {
+        Get-ChildItem -Path C:\$WINDOWS.~BT -Include *.* -File -Recurse | foreach { $_.Delete()}
+        }
+        if ((Test-Path C:\Windows\SoftwareDistribution)) {
+            Get-ChildItem -Path C:\Windows\SoftwareDistribution -Include *.* -File -Recurse | foreach { $_.Delete()}
         }
         Get-ChildItem *.msu | foreach { Remove-Item -Path $_.FullName }
         Get-ChildItem *.exe | foreach { Remove-Item -Path $_.FullName }
