@@ -7,8 +7,11 @@ After a lot of late nights patching critical servers until past 2AM, I thought t
 This script assumes that:
 
 You have this folder created: C:\WindowsUpdates
+
 You have both UpdateEndpoints.ps1 and UpdateEndpoints-RemoteMachine.ps1 located in the C:\WindowsUpdates folder
+
 When you download an update from the Microsoft Catalog, you will keep the KBXXXXXX in the name. It can be just named for the KB, or you can copy and paste the entire update title, whatever you want - just make sure the full KB is in the name of the file, as this is how the script tracks what each server needs
+
 You have your list of machines in CSV format that the script can access. The CSV should be one column, with endpoints in the first cell, followed by all the machines you want to update
 
 This is a set of two scripts; UpdateEndpoints.ps1 and UpdateEndpoints-RemoteMachine.ps1. The reason I broke this up into two separate files was to show the progress of installing a CAB/MSU file, which from all my testing was only possible to show in a native PowerShell session. It's possible to run the same script through Invoke-Command on all these servers at once, but the major drawback is the fact that you will not see any of the progress, and so you won't know the status of the update, how many updates are left, if it's hung up, etc. There may be a better way to do this that a PowerShell professional would be able to pull off, but this is the best way I found.
