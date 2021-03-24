@@ -1,5 +1,5 @@
 # powershell
-After a lot of late nights patching critical servers until past 2AM, I thought that there must be a better way than what I was doing. I ended up developing a set of scripts that essentially run Windows MSU files in parallel on list of machines. After a lot of refining and testing, I ran it on the last Critical Patch night and saved several hours of time. I still worked until 2AM because one server in particular - OECU-DNAWEBQ2 - kept getting completely hung up in the middle of the cumulative update for some reason. If that had not gotten hung up, I would have been done at 11:45PM thanks to this script.
+After a lot of late nights patching critical servers until past 2AM, I thought that there must be a better way than what I was doing. I ended up developing a set of scripts that essentially run Windows MSU files in parallel on list of machines. After a lot of refining and testing, I ran it on the last Critical Patch night and saved several hours of time.
 
 
 
