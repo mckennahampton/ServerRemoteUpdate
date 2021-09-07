@@ -11,7 +11,7 @@
 # It is expected that the first row in the CSV is "endpoints", followed by each endpoint you want to update,
 # ie endpoints,test-server1,test-server2,test-server3
 #
-# This file is used in conjunction with the UpdateEndpoints-Local.ps1 file, which is expected in C:\WindowsUpdates.
+# This file is used in conjunction with the UpdateEndpoints-RemoteMachine.ps1 file, which is expected in C:\WindowsUpdates.
 # If that file is not present, you will be alerted of this. That file is necessary, as it is compied over to the
 # remote endpoint and ran in a remote Powershell session, so as to allow you to see the progress for each CAB file
 # installation, and any error messages that may come from it. After trying everything I could to get this to work
@@ -126,13 +126,13 @@ function updateEndpoints( $endpointCSV, $emailSummary, $toEmail, $fromEmail, $sm
     Write-Host "Checking downloaded updates from C:\WindowsUpdates...";
     $doneCheckingLocal = $false
     DO {
-        # Check if UpdateEndpoints-Local.ps1 exists where expected
-        $test = Test-Path -path "C:\WindowsUpdates\UpdateEndpoints-Local.ps1";
+        # Check if UpdateEndpoints-RemoteMachine.ps1 exists where expected
+        $test = Test-Path -path "C:\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1";
         If ($test -eq $true) {
-            Write-Host "C:\WindowsUpdates\UpdateEndpoints-Local.ps1 is present." -ForegroundColor Green
+            Write-Host "C:\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1 is present." -ForegroundColor Green
             $doneCheckingLocal = $true
         } else {
-            $response = Read-Host "C:\WindowsUpdates\UpdateEndpoints-Local.ps1 is missing locally. Please place that script file here and hit any key to re-check." -ForegroundColor Red
+            $response = Read-Host "C:\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1 is missing locally. Please place that script file here and hit any key to re-check." -ForegroundColor Red
         }
     } WHILE ($doneCheckingLocal -ne $true)
     $doneCheckingLocal = $false
@@ -183,18 +183,18 @@ function updateEndpoints( $endpointCSV, $emailSummary, $toEmail, $fromEmail, $sm
             New-Item -ItemType directory -Path "\\$($server.ServerName)\c$\WindowsUpdates"
         }
         # Check if remote machine has the local ps1 script; prompt for overwrite if exists
-        $remoteScript = Test-Path "\\$($server.ServerName)\c$\WindowsUpdates\UpdateEndpoints-Local.ps1"
+        $remoteScript = Test-Path "\\$($server.ServerName)\c$\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1"
         If ($remoteScript -eq $true) {
             $response = Read-Host "Remote script exists; overwrite (y/n)?";
             if ($response -eq "y") {
                 Write-Host "Overwriting remote script with new version..."
-                Copy-Item -Path "C:\WindowsUpdates\UpdateEndpoints-Local.ps1" -Destination "\\$($server.ServerName)\c$\WindowsUpdates\UpdateEndpoints-Local.ps1" -Force
+                Copy-Item -Path "C:\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1" -Destination "\\$($server.ServerName)\c$\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1" -Force
             } else {
                 write-host "Leaving remote script as-is";
             }
         } else {
             Write-Host "Remote script does not exist; copying..."
-            Copy-Item -Path "C:\WindowsUpdates\UpdateEndpoints-Local.ps1" -Destination "\\$($server.ServerName)\c$\WindowsUpdates\UpdateEndpoints-Local.ps1" -Force
+            Copy-Item -Path "C:\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1" -Destination "\\$($server.ServerName)\c$\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1" -Force
         }
         $remoteLocalUpdates = Get-ChildItem "\\$($server.ServerName)\c$\WindowsUpdates\*" -Include "*.msu", "*.exe";
         $server.MissingKB | % { # loop through each unique missing update and check if they've been copied to server
@@ -231,7 +231,7 @@ function updateEndpoints( $endpointCSV, $emailSummary, $toEmail, $fromEmail, $sm
         }
     }
     foreach ($server IN $serverInvokeList) {
-        Start-Process -FilePath 'PowerShell.exe' -ArgumentList '-NoExit',"-command `"Write-Host 'C:\WindowsUpdates\UpdateEndpoints-Local.ps1'; Enter-PSSession -ComputerName $server`";"
+        Start-Process -FilePath 'PowerShell.exe' -ArgumentList '-NoExit',"-command `"Write-Host 'C:\WindowsUpdates\UpdateEndpoints-RemoteMachine.ps1'; Enter-PSSession -ComputerName $server`";"
     }
 
     # Start testing for all endpoints reboot cycle
